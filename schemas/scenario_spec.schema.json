@@ -1,0 +1,948 @@
+{
+ "$defs": {
+  "AclRule": {
+   "additionalProperties": false,
+   "properties": {
+    "seq": {
+     "title": "Seq",
+     "type": "integer"
+    },
+    "action": {
+     "enum": [
+      "permit",
+      "deny"
+     ],
+     "title": "Action",
+     "type": "string"
+    },
+    "proto": {
+     "enum": [
+      "ip",
+      "tcp",
+      "udp",
+      "icmp"
+     ],
+     "title": "Proto",
+     "type": "string"
+    },
+    "src": {
+     "title": "Src",
+     "type": "string"
+    },
+    "dst": {
+     "title": "Dst",
+     "type": "string"
+    },
+    "dport": {
+     "anyOf": [
+      {
+       "type": "integer"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Dport"
+    }
+   },
+   "required": [
+    "seq",
+    "action",
+    "proto",
+    "src",
+    "dst"
+   ],
+   "title": "AclRule",
+   "type": "object"
+  },
+  "Degradation": {
+   "additionalProperties": false,
+   "properties": {
+    "id": {
+     "title": "Id",
+     "type": "string"
+    },
+    "type": {
+     "title": "Type",
+     "type": "string"
+    },
+    "targets": {
+     "items": {
+      "type": "string"
+     },
+     "title": "Targets",
+     "type": "array"
+    },
+    "params": {
+     "additionalProperties": true,
+     "title": "Params",
+     "type": "object"
+    },
+    "description": {
+     "title": "Description",
+     "type": "string"
+    }
+   },
+   "required": [
+    "id",
+    "type",
+    "description"
+   ],
+   "title": "Degradation",
+   "type": "object"
+  },
+  "Device": {
+   "additionalProperties": false,
+   "properties": {
+    "name": {
+     "title": "Name",
+     "type": "string"
+    },
+    "aliases": {
+     "items": {
+      "type": "string"
+     },
+     "title": "Aliases",
+     "type": "array"
+    },
+    "kind": {
+     "enum": [
+      "edge",
+      "switch",
+      "server",
+      "workstation",
+      "probe",
+      "ops"
+     ],
+     "title": "Kind",
+     "type": "string"
+    },
+    "site": {
+     "title": "Site",
+     "type": "string"
+    },
+    "model": {
+     "title": "Model",
+     "type": "string"
+    },
+    "os": {
+     "enum": [
+      "ios",
+      "linux"
+     ],
+     "title": "Os",
+     "type": "string"
+    },
+    "interfaces": {
+     "additionalProperties": {
+      "$ref": "#/$defs/Interface"
+     },
+     "title": "Interfaces",
+     "type": "object"
+    },
+    "gateway": {
+     "anyOf": [
+      {
+       "type": "string"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Gateway"
+    },
+    "routes": {
+     "items": {
+      "$ref": "#/$defs/Route"
+     },
+     "title": "Routes",
+     "type": "array"
+    },
+    "acls": {
+     "additionalProperties": {
+      "items": {
+       "$ref": "#/$defs/AclRule"
+      },
+      "type": "array"
+     },
+     "title": "Acls",
+     "type": "object"
+    },
+    "acl_in": {
+     "additionalProperties": {
+      "type": "string"
+     },
+     "title": "Acl In",
+     "type": "object"
+    },
+    "dhcp_helper": {
+     "additionalProperties": {
+      "type": "string"
+     },
+     "title": "Dhcp Helper",
+     "type": "object"
+    },
+    "services": {
+     "additionalProperties": {
+      "$ref": "#/$defs/Service"
+     },
+     "title": "Services",
+     "type": "object"
+    },
+    "serial": {
+     "default": "",
+     "title": "Serial",
+     "type": "string"
+    },
+    "mac": {
+     "default": "",
+     "title": "Mac",
+     "type": "string"
+    },
+    "hostname": {
+     "default": "",
+     "title": "Hostname",
+     "type": "string"
+    }
+   },
+   "required": [
+    "name",
+    "kind",
+    "site",
+    "model",
+    "os",
+    "interfaces"
+   ],
+   "title": "Device",
+   "type": "object"
+  },
+  "Distractor": {
+   "additionalProperties": false,
+   "properties": {
+    "kind": {
+     "title": "Kind",
+     "type": "string"
+    },
+    "target": {
+     "title": "Target",
+     "type": "string"
+    },
+    "description": {
+     "title": "Description",
+     "type": "string"
+    }
+   },
+   "required": [
+    "kind",
+    "target",
+    "description"
+   ],
+   "title": "Distractor",
+   "type": "object"
+  },
+  "EvidencePolicy": {
+   "additionalProperties": false,
+   "properties": {
+    "schema_version": {
+     "const": "1.0",
+     "default": "1.0",
+     "title": "Schema Version",
+     "type": "string"
+    },
+    "completeness": {
+     "title": "Completeness",
+     "type": "number"
+    },
+    "poll_interval_s": {
+     "default": 5.0,
+     "title": "Poll Interval S",
+     "type": "number"
+    },
+    "collection_delay_s": {
+     "default": 2.0,
+     "title": "Collection Delay S",
+     "type": "number"
+    },
+    "stale_after_polls": {
+     "default": 3,
+     "title": "Stale After Polls",
+     "type": "integer"
+    },
+    "collector_of": {
+     "additionalProperties": {
+      "type": "string"
+     },
+     "title": "Collector Of",
+     "type": "object"
+    },
+    "degradations": {
+     "items": {
+      "$ref": "#/$defs/Degradation"
+     },
+     "title": "Degradations",
+     "type": "array"
+    }
+   },
+   "required": [
+    "completeness",
+    "collector_of",
+    "degradations"
+   ],
+   "title": "EvidencePolicy",
+   "type": "object"
+  },
+  "Fault": {
+   "additionalProperties": false,
+   "properties": {
+    "id": {
+     "title": "Id",
+     "type": "string"
+    },
+    "type": {
+     "title": "Type",
+     "type": "string"
+    },
+    "fault_class": {
+     "title": "Fault Class",
+     "type": "string"
+    },
+    "component": {
+     "title": "Component",
+     "type": "string"
+    },
+    "accepted_components": {
+     "items": {
+      "type": "string"
+     },
+     "title": "Accepted Components",
+     "type": "array"
+    },
+    "accepted_classes": {
+     "items": {
+      "type": "string"
+     },
+     "title": "Accepted Classes",
+     "type": "array"
+    },
+    "mutations": {
+     "items": {
+      "$ref": "#/$defs/Mutation"
+     },
+     "title": "Mutations",
+     "type": "array"
+    },
+    "onset_offset_s": {
+     "title": "Onset Offset S",
+     "type": "integer"
+    },
+    "symptom_flows": {
+     "items": {
+      "type": "string"
+     },
+     "title": "Symptom Flows",
+     "type": "array"
+    },
+    "description": {
+     "title": "Description",
+     "type": "string"
+    }
+   },
+   "required": [
+    "id",
+    "type",
+    "fault_class",
+    "component",
+    "accepted_components",
+    "accepted_classes",
+    "mutations",
+    "onset_offset_s",
+    "symptom_flows",
+    "description"
+   ],
+   "title": "Fault",
+   "type": "object"
+  },
+  "Flow": {
+   "additionalProperties": false,
+   "description": "An intended (or forbidden) traffic flow, used for behavioural health checks.",
+   "properties": {
+    "id": {
+     "title": "Id",
+     "type": "string"
+    },
+    "src": {
+     "title": "Src",
+     "type": "string"
+    },
+    "dst": {
+     "title": "Dst",
+     "type": "string"
+    },
+    "proto": {
+     "enum": [
+      "tcp",
+      "udp",
+      "icmp"
+     ],
+     "title": "Proto",
+     "type": "string"
+    },
+    "port": {
+     "anyOf": [
+      {
+       "type": "integer"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Port"
+    },
+    "by_name": {
+     "anyOf": [
+      {
+       "type": "string"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "By Name"
+    },
+    "service": {
+     "anyOf": [
+      {
+       "type": "string"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Service"
+    }
+   },
+   "required": [
+    "id",
+    "src",
+    "dst",
+    "proto"
+   ],
+   "title": "Flow",
+   "type": "object"
+  },
+  "GenerationConfig": {
+   "additionalProperties": false,
+   "properties": {
+    "schema_version": {
+     "const": "1.0",
+     "default": "1.0",
+     "title": "Schema Version",
+     "type": "string"
+    },
+    "family_weights": {
+     "additionalProperties": {
+      "type": "number"
+     },
+     "title": "Family Weights",
+     "type": "object"
+    },
+    "fault_count_weights": {
+     "additionalProperties": {
+      "type": "number"
+     },
+     "title": "Fault Count Weights",
+     "type": "object"
+    },
+    "fault_type_weights": {
+     "additionalProperties": {
+      "type": "number"
+     },
+     "title": "Fault Type Weights",
+     "type": "object"
+    },
+    "degradation_weights": {
+     "additionalProperties": {
+      "type": "number"
+     },
+     "title": "Degradation Weights",
+     "type": "object"
+    },
+    "difficulty": {
+     "default": 0.5,
+     "maximum": 1,
+     "minimum": 0,
+     "title": "Difficulty",
+     "type": "number"
+    },
+    "evidence_completeness": {
+     "default": 0.6,
+     "maximum": 1,
+     "minimum": 0,
+     "title": "Evidence Completeness",
+     "type": "number"
+    },
+    "balanced": {
+     "default": false,
+     "title": "Balanced",
+     "type": "boolean"
+    },
+    "hq_workstations": {
+     "default": [
+      2,
+      5
+     ],
+     "maxItems": 2,
+     "minItems": 2,
+     "prefixItems": [
+      {
+       "type": "integer"
+      },
+      {
+       "type": "integer"
+      }
+     ],
+     "title": "Hq Workstations",
+     "type": "array"
+    },
+    "branch_workstations": {
+     "default": [
+      2,
+      6
+     ],
+     "maxItems": 2,
+     "minItems": 2,
+     "prefixItems": [
+      {
+       "type": "integer"
+      },
+      {
+       "type": "integer"
+      }
+     ],
+     "title": "Branch Workstations",
+     "type": "array"
+    },
+    "max_devices": {
+     "default": 24,
+     "maximum": 64,
+     "minimum": 8,
+     "title": "Max Devices",
+     "type": "integer"
+    }
+   },
+   "title": "GenerationConfig",
+   "type": "object"
+  },
+  "Interface": {
+   "additionalProperties": false,
+   "properties": {
+    "name": {
+     "title": "Name",
+     "type": "string"
+    },
+    "ip": {
+     "anyOf": [
+      {
+       "type": "string"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Ip"
+    },
+    "admin_up": {
+     "default": true,
+     "title": "Admin Up",
+     "type": "boolean"
+    },
+    "role": {
+     "default": "lan",
+     "enum": [
+      "wan",
+      "lan",
+      "access",
+      "uplink",
+      "host",
+      "svi"
+     ],
+     "title": "Role",
+     "type": "string"
+    },
+    "vlan": {
+     "anyOf": [
+      {
+       "type": "integer"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Vlan"
+    },
+    "peer": {
+     "anyOf": [
+      {
+       "type": "string"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Peer"
+    },
+    "description": {
+     "default": "",
+     "title": "Description",
+     "type": "string"
+    }
+   },
+   "required": [
+    "name"
+   ],
+   "title": "Interface",
+   "type": "object"
+  },
+  "Mutation": {
+   "additionalProperties": false,
+   "properties": {
+    "op": {
+     "enum": [
+      "set_iface_admin",
+      "remove_route",
+      "insert_acl_rule",
+      "remove_acl_rule",
+      "stop_service",
+      "set_dns_record",
+      "set_port_vlan"
+     ],
+     "title": "Op",
+     "type": "string"
+    },
+    "device": {
+     "anyOf": [
+      {
+       "type": "string"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Device"
+    },
+    "args": {
+     "additionalProperties": true,
+     "title": "Args",
+     "type": "object"
+    }
+   },
+   "required": [
+    "op"
+   ],
+   "title": "Mutation",
+   "type": "object"
+  },
+  "Route": {
+   "additionalProperties": false,
+   "properties": {
+    "prefix": {
+     "title": "Prefix",
+     "type": "string"
+    },
+    "next_hop": {
+     "title": "Next Hop",
+     "type": "string"
+    }
+   },
+   "required": [
+    "prefix",
+    "next_hop"
+   ],
+   "title": "Route",
+   "type": "object"
+  },
+  "Service": {
+   "additionalProperties": false,
+   "properties": {
+    "name": {
+     "title": "Name",
+     "type": "string"
+    },
+    "unit": {
+     "title": "Unit",
+     "type": "string"
+    },
+    "proto": {
+     "enum": [
+      "tcp",
+      "udp"
+     ],
+     "title": "Proto",
+     "type": "string"
+    },
+    "port": {
+     "title": "Port",
+     "type": "integer"
+    },
+    "running": {
+     "default": true,
+     "title": "Running",
+     "type": "boolean"
+    }
+   },
+   "required": [
+    "name",
+    "unit",
+    "proto",
+    "port"
+   ],
+   "title": "Service",
+   "type": "object"
+  },
+  "Site": {
+   "additionalProperties": false,
+   "properties": {
+    "code": {
+     "title": "Code",
+     "type": "string"
+    },
+    "role": {
+     "enum": [
+      "hq",
+      "branch"
+     ],
+     "title": "Role",
+     "type": "string"
+    },
+    "subnets": {
+     "additionalProperties": {
+      "type": "string"
+     },
+     "title": "Subnets",
+     "type": "object"
+    },
+    "vlans": {
+     "additionalProperties": {
+      "type": "integer"
+     },
+     "title": "Vlans",
+     "type": "object"
+    }
+   },
+   "required": [
+    "code",
+    "role",
+    "subnets",
+    "vlans"
+   ],
+   "title": "Site",
+   "type": "object"
+  },
+  "Timeline": {
+   "additionalProperties": false,
+   "properties": {
+    "lab_start": {
+     "title": "Lab Start",
+     "type": "string"
+    },
+    "history_window_s": {
+     "title": "History Window S",
+     "type": "integer"
+    },
+    "backup_offset_s": {
+     "title": "Backup Offset S",
+     "type": "integer"
+    },
+    "diagram_age_days": {
+     "title": "Diagram Age Days",
+     "type": "integer"
+    }
+   },
+   "required": [
+    "lab_start",
+    "history_window_s",
+    "backup_offset_s",
+    "diagram_age_days"
+   ],
+   "title": "Timeline",
+   "type": "object"
+  },
+  "Topology": {
+   "additionalProperties": false,
+   "properties": {
+    "domain": {
+     "title": "Domain",
+     "type": "string"
+    },
+    "sites": {
+     "items": {
+      "$ref": "#/$defs/Site"
+     },
+     "title": "Sites",
+     "type": "array"
+    },
+    "devices": {
+     "additionalProperties": {
+      "$ref": "#/$defs/Device"
+     },
+     "title": "Devices",
+     "type": "object"
+    },
+    "dns_zone": {
+     "additionalProperties": {
+      "type": "string"
+     },
+     "title": "Dns Zone",
+     "type": "object"
+    },
+    "dhcp_leases": {
+     "additionalProperties": {
+      "type": "string"
+     },
+     "title": "Dhcp Leases",
+     "type": "object"
+    },
+    "intended_flows": {
+     "items": {
+      "$ref": "#/$defs/Flow"
+     },
+     "title": "Intended Flows",
+     "type": "array"
+    },
+    "forbidden_flows": {
+     "items": {
+      "$ref": "#/$defs/Flow"
+     },
+     "title": "Forbidden Flows",
+     "type": "array"
+    },
+    "retired_devices": {
+     "items": {
+      "type": "string"
+     },
+     "title": "Retired Devices",
+     "type": "array"
+    }
+   },
+   "required": [
+    "domain",
+    "sites",
+    "devices",
+    "dns_zone",
+    "dhcp_leases",
+    "intended_flows",
+    "forbidden_flows"
+   ],
+   "title": "Topology",
+   "type": "object"
+  }
+ },
+ "additionalProperties": false,
+ "properties": {
+  "schema_version": {
+   "const": "1.0",
+   "default": "1.0",
+   "title": "Schema Version",
+   "type": "string"
+  },
+  "env_id": {
+   "title": "Env Id",
+   "type": "string"
+  },
+  "seed": {
+   "title": "Seed",
+   "type": "integer"
+  },
+  "seed_source": {
+   "title": "Seed Source",
+   "type": "string"
+  },
+  "generator_version": {
+   "title": "Generator Version",
+   "type": "string"
+  },
+  "component_versions": {
+   "additionalProperties": {
+    "type": "string"
+   },
+   "title": "Component Versions",
+   "type": "object"
+  },
+  "config": {
+   "$ref": "#/$defs/GenerationConfig"
+  },
+  "generation_inputs": {
+   "additionalProperties": true,
+   "title": "Generation Inputs",
+   "type": "object"
+  },
+  "family": {
+   "title": "Family",
+   "type": "string"
+  },
+  "topology": {
+   "$ref": "#/$defs/Topology"
+  },
+  "faults": {
+   "items": {
+    "$ref": "#/$defs/Fault"
+   },
+   "title": "Faults",
+   "type": "array"
+  },
+  "interacting": {
+   "title": "Interacting",
+   "type": "boolean"
+  },
+  "evidence": {
+   "$ref": "#/$defs/EvidencePolicy"
+  },
+  "timeline": {
+   "$ref": "#/$defs/Timeline"
+  },
+  "distractors": {
+   "items": {
+    "$ref": "#/$defs/Distractor"
+   },
+   "title": "Distractors",
+   "type": "array"
+  },
+  "task_text": {
+   "title": "Task Text",
+   "type": "string"
+  },
+  "spec_sha256": {
+   "default": "",
+   "title": "Spec Sha256",
+   "type": "string"
+  }
+ },
+ "required": [
+  "env_id",
+  "seed",
+  "seed_source",
+  "generator_version",
+  "component_versions",
+  "config",
+  "generation_inputs",
+  "family",
+  "topology",
+  "faults",
+  "interacting",
+  "evidence",
+  "timeline",
+  "distractors",
+  "task_text"
+ ],
+ "title": "ScenarioSpec",
+ "type": "object"
+}

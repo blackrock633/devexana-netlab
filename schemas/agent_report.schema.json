@@ -1,0 +1,302 @@
+{
+ "$defs": {
+  "ReportAction": {
+   "additionalProperties": false,
+   "properties": {
+    "target": {
+     "title": "Target",
+     "type": "string"
+    },
+    "description": {
+     "title": "Description",
+     "type": "string"
+    },
+    "commands": {
+     "items": {
+      "type": "string"
+     },
+     "title": "Commands",
+     "type": "array"
+    },
+    "result": {
+     "default": "",
+     "title": "Result",
+     "type": "string"
+    }
+   },
+   "required": [
+    "target",
+    "description"
+   ],
+   "title": "ReportAction",
+   "type": "object"
+  },
+  "ReportDevice": {
+   "additionalProperties": false,
+   "properties": {
+    "name": {
+     "title": "Name",
+     "type": "string"
+    },
+    "ip": {
+     "anyOf": [
+      {
+       "type": "string"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Ip"
+    },
+    "kind": {
+     "anyOf": [
+      {
+       "type": "string"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Kind"
+    },
+    "site": {
+     "anyOf": [
+      {
+       "type": "string"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Site"
+    }
+   },
+   "required": [
+    "name"
+   ],
+   "title": "ReportDevice",
+   "type": "object"
+  },
+  "ReportFinding": {
+   "additionalProperties": false,
+   "properties": {
+    "component": {
+     "title": "Component",
+     "type": "string"
+    },
+    "fault_class": {
+     "title": "Fault Class",
+     "type": "string"
+    },
+    "statement": {
+     "title": "Statement",
+     "type": "string"
+    },
+    "evidence": {
+     "items": {
+      "type": "string"
+     },
+     "title": "Evidence",
+     "type": "array"
+    },
+    "confidence": {
+     "default": 0.5,
+     "maximum": 1,
+     "minimum": 0,
+     "title": "Confidence",
+     "type": "number"
+    }
+   },
+   "required": [
+    "component",
+    "fault_class",
+    "statement"
+   ],
+   "title": "ReportFinding",
+   "type": "object"
+  },
+  "ReportUnknown": {
+   "additionalProperties": false,
+   "properties": {
+    "component": {
+     "title": "Component",
+     "type": "string"
+    },
+    "reason": {
+     "title": "Reason",
+     "type": "string"
+    }
+   },
+   "required": [
+    "component",
+    "reason"
+   ],
+   "title": "ReportUnknown",
+   "type": "object"
+  },
+  "ReportVerification": {
+   "additionalProperties": false,
+   "properties": {
+    "check": {
+     "title": "Check",
+     "type": "string"
+    },
+    "passed": {
+     "title": "Passed",
+     "type": "boolean"
+    },
+    "detail": {
+     "default": "",
+     "title": "Detail",
+     "type": "string"
+    }
+   },
+   "required": [
+    "check",
+    "passed"
+   ],
+   "title": "ReportVerification",
+   "type": "object"
+  }
+ },
+ "additionalProperties": false,
+ "properties": {
+  "schema_version": {
+   "default": "1.1",
+   "enum": [
+    "1.0",
+    "1.1"
+   ],
+   "title": "Schema Version",
+   "type": "string"
+  },
+  "agent": {
+   "additionalProperties": {
+    "type": "string"
+   },
+   "title": "Agent",
+   "type": "object"
+  },
+  "summary": {
+   "title": "Summary",
+   "type": "string"
+  },
+  "outcome": {
+   "default": "completed",
+   "enum": [
+    "completed",
+    "inconclusive",
+    "failed"
+   ],
+   "title": "Outcome",
+   "type": "string"
+  },
+  "healthy_overall": {
+   "anyOf": [
+    {
+     "type": "boolean"
+    },
+    {
+     "type": "null"
+    }
+   ],
+   "default": null,
+   "title": "Healthy Overall"
+  },
+  "devices": {
+   "items": {
+    "$ref": "#/$defs/ReportDevice"
+   },
+   "title": "Devices",
+   "type": "array"
+  },
+  "links": {
+   "items": {
+    "maxItems": 2,
+    "minItems": 2,
+    "prefixItems": [
+     {
+      "type": "string"
+     },
+     {
+      "type": "string"
+     }
+    ],
+    "type": "array"
+   },
+   "title": "Links",
+   "type": "array"
+  },
+  "component_status": {
+   "additionalProperties": {
+    "enum": [
+     "healthy",
+     "failed",
+     "degraded",
+     "unknown",
+     "absent"
+    ],
+    "type": "string"
+   },
+   "title": "Component Status",
+   "type": "object"
+  },
+  "findings": {
+   "items": {
+    "$ref": "#/$defs/ReportFinding"
+   },
+   "title": "Findings",
+   "type": "array"
+  },
+  "unknowns": {
+   "items": {
+    "$ref": "#/$defs/ReportUnknown"
+   },
+   "title": "Unknowns",
+   "type": "array"
+  },
+  "actions": {
+   "items": {
+    "$ref": "#/$defs/ReportAction"
+   },
+   "title": "Actions",
+   "type": "array"
+  },
+  "verification": {
+   "items": {
+    "$ref": "#/$defs/ReportVerification"
+   },
+   "title": "Verification",
+   "type": "array"
+  },
+  "claims_recovered": {
+   "anyOf": [
+    {
+     "type": "boolean"
+    },
+    {
+     "type": "null"
+    }
+   ],
+   "default": null,
+   "title": "Claims Recovered"
+  },
+  "errors": {
+   "items": {
+    "type": "string"
+   },
+   "title": "Errors",
+   "type": "array"
+  }
+ },
+ "required": [
+  "agent",
+  "summary"
+ ],
+ "title": "AgentReport",
+ "type": "object"
+}

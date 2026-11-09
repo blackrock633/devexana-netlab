@@ -1,0 +1,103 @@
+{
+ "additionalProperties": false,
+ "properties": {
+  "schema_version": {
+   "const": "1.0",
+   "default": "1.0",
+   "title": "Schema Version",
+   "type": "string"
+  },
+  "family_weights": {
+   "additionalProperties": {
+    "type": "number"
+   },
+   "title": "Family Weights",
+   "type": "object"
+  },
+  "fault_count_weights": {
+   "additionalProperties": {
+    "type": "number"
+   },
+   "title": "Fault Count Weights",
+   "type": "object"
+  },
+  "fault_type_weights": {
+   "additionalProperties": {
+    "type": "number"
+   },
+   "title": "Fault Type Weights",
+   "type": "object"
+  },
+  "degradation_weights": {
+   "additionalProperties": {
+    "type": "number"
+   },
+   "title": "Degradation Weights",
+   "type": "object"
+  },
+  "difficulty": {
+   "default": 0.5,
+   "maximum": 1,
+   "minimum": 0,
+   "title": "Difficulty",
+   "type": "number"
+  },
+  "evidence_completeness": {
+   "default": 0.6,
+   "maximum": 1,
+   "minimum": 0,
+   "title": "Evidence Completeness",
+   "type": "number"
+  },
+  "balanced": {
+   "default": false,
+   "title": "Balanced",
+   "type": "boolean"
+  },
+  "hq_workstations": {
+   "default": [
+    2,
+    5
+   ],
+   "maxItems": 2,
+   "minItems": 2,
+   "prefixItems": [
+    {
+     "type": "integer"
+    },
+    {
+     "type": "integer"
+    }
+   ],
+   "title": "Hq Workstations",
+   "type": "array"
+  },
+  "branch_workstations": {
+   "default": [
+    2,
+    6
+   ],
+   "maxItems": 2,
+   "minItems": 2,
+   "prefixItems": [
+    {
+     "type": "integer"
+    },
+    {
+     "type": "integer"
+    }
+   ],
+   "title": "Branch Workstations",
+   "type": "array"
+  },
+  "max_devices": {
+   "default": 24,
+   "maximum": 64,
+   "minimum": 8,
+   "title": "Max Devices",
+   "type": "integer"
+  }
+ },
+ "title": "GenerationConfig",
+ "type": "object"
+}

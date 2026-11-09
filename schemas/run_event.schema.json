@@ -1,0 +1,101 @@
+{
+ "additionalProperties": false,
+ "properties": {
+  "schema_version": {
+   "default": "1.1",
+   "enum": [
+    "1.0",
+    "1.1"
+   ],
+   "title": "Schema Version",
+   "type": "string"
+  },
+  "seq": {
+   "title": "Seq",
+   "type": "integer"
+  },
+  "ts": {
+   "title": "Ts",
+   "type": "string"
+  },
+  "t_rel_s": {
+   "title": "T Rel S",
+   "type": "number"
+  },
+  "source": {
+   "enum": [
+    "api",
+    "ssh",
+    "bastion",
+    "console",
+    "service",
+    "collector",
+    "control",
+    "client",
+    "evaluator"
+   ],
+   "title": "Source",
+   "type": "string"
+  },
+  "kind": {
+   "title": "Kind",
+   "type": "string"
+  },
+  "actor": {
+   "default": "",
+   "title": "Actor",
+   "type": "string"
+  },
+  "target": {
+   "default": "",
+   "title": "Target",
+   "type": "string"
+  },
+  "detail": {
+   "additionalProperties": true,
+   "title": "Detail",
+   "type": "object"
+  },
+  "ok": {
+   "default": true,
+   "title": "Ok",
+   "type": "boolean"
+  },
+  "reveals": {
+   "items": {
+    "type": "string"
+   },
+   "title": "Reveals",
+   "type": "array"
+  },
+  "symptoms": {
+   "items": {
+    "type": "string"
+   },
+   "title": "Symptoms",
+   "type": "array"
+  },
+  "change": {
+   "anyOf": [
+    {
+     "additionalProperties": true,
+     "type": "object"
+    },
+    {
+     "type": "null"
+    }
+   ],
+   "default": null,
+   "title": "Change"
+  }
+ },
+ "required": [
+  "seq",
+  "ts",
+  "t_rel_s",
+  "source",
+  "kind"
+ ],
+ "title": "RunEvent",
+ "type": "object"
+}

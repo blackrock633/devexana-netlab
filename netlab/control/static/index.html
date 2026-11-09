@@ -1,0 +1,245 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Netlab Control</title>
+<style>
+:root{--on-accent:#fff;--bg:#f6f7f9;--panel:#fff;--ink:#16191d;--muted:#525c68;--line:#dfe3e8;--accent:#1f5fbf;--ok:#1d7a46;--bad:#b42318;--warn:#a15c00;--chip:#eef1f5;--mono:ui-monospace,SFMono-Regular,Menlo,monospace}
+@media (prefers-color-scheme:dark){:root{--on-accent:#0b1730;--bg:#111418;--panel:#181c21;--ink:#e6e9ed;--muted:#97a1ad;--line:#2a3038;--accent:#6ea3ff;--ok:#4cc27e;--bad:#ff7a6e;--warn:#e7a54a;--chip:#222831}}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:14px/1.45 system-ui,-apple-system,Segoe UI,sans-serif}
+header{display:flex;gap:12px;align-items:center;padding:12px 20px;border-bottom:1px solid var(--line);background:var(--panel);position:sticky;top:0;z-index:2}
+header h1{font-size:16px;margin:0;font-weight:650}header .sub{color:var(--muted)}
+.chip{background:var(--chip);border-radius:99px;padding:2px 10px;font-size:12px;color:var(--muted)}.chip.on{color:var(--ok)}
+main{display:grid;grid-template-columns:340px 1fr;gap:16px;padding:16px 20px;max-width:1500px;margin:0 auto}
+@media (max-width:900px){main{grid-template-columns:1fr;padding:12px 16px}}
+section{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:14px 16px;margin-bottom:16px;min-width:0}
+h2{font-size:13px;text-transform:uppercase;letter-spacing:.04em;color:var(--muted);margin:0 0 10px}
+label{display:flex;justify-content:space-between;align-items:center;gap:8px;margin:6px 0;font-size:13px}
+input[type=number]{width:64px}input,select{font:inherit;color:inherit;background:var(--bg);border:1px solid var(--line);border-radius:6px;padding:3px 6px}
+input[type=range]{flex:1;max-width:150px}
+button{font:inherit;border:1px solid var(--line);background:var(--chip);color:var(--ink);border-radius:7px;padding:6px 12px;cursor:pointer}
+button.primary{background:var(--accent);border-color:var(--accent);color:var(--on-accent);font-weight:600}button:disabled{opacity:.45;cursor:not-allowed}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}.muted{color:var(--muted)}.mono{font-family:var(--mono);font-size:12px}
+details summary{cursor:pointer;color:var(--muted);margin:8px 0 4px}
+.list{max-height:260px;overflow:auto;border:1px solid var(--line);border-radius:8px}
+.list div{padding:6px 10px;border-bottom:1px solid var(--line);cursor:pointer}.list div:last-child{border:0}.list div.sel{background:var(--chip)}
+table{width:100%;border-collapse:collapse;font-size:12.5px}th,td{text-align:left;padding:5px 6px;border-bottom:1px solid var(--line);vertical-align:top}
+th{color:var(--muted);font-weight:600}.scroll{max-height:340px;overflow:auto}
+.kv{display:grid;grid-template-columns:auto 1fr;gap:3px 12px;font-size:13px}.kv b{font-weight:500;color:var(--muted)}
+.bar{height:8px;background:var(--chip);border-radius:4px;overflow:hidden}.bar i{display:block;height:100%;background:var(--accent)}
+.score{display:grid;grid-template-columns:130px 1fr 48px;gap:8px;align-items:center;margin:4px 0;font-size:13px}
+.pass{color:var(--ok)}.fail{color:var(--bad)}.big{font-size:28px;font-weight:700}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px}@media (max-width:1100px){.grid2{grid-template-columns:1fr}}
+.notice{border-left:3px solid var(--warn);padding:6px 10px;background:var(--chip);border-radius:4px;font-size:12.5px;margin:8px 0}
+</style>
+</head>
+<body>
+<header><h1>Netlab</h1><span class="sub">randomized network testing lab for Devexana</span><span id="labchip" class="chip">lab idle</span><span id="runchip" class="chip"></span></header>
+<main>
+<div>
+  <section>
+    <h2>Environment configuration</h2>
+    <label>Family <select id="family"></select></label>
+    <label>Difficulty <input type="range" id="difficulty" min="0" max="1" step="0.05"><span id="difficulty_v" class="mono"></span></label>
+    <label>Evidence completeness <input type="range" id="completeness" min="0" max="1" step="0.05"><span id="completeness_v" class="mono"></span></label>
+    <label>Balanced coverage mode <input type="checkbox" id="balanced"></label>
+    <details><summary>Fault count weights</summary><div id="fcw"></div></details>
+    <details><summary>Fault type weights</summary><div id="ftw"></div></details>
+    <details><summary>Evidence degradation weights</summary><div id="dgw"></div></details>
+    <details><summary>Size</summary>
+      <label>Max devices <input type="number" id="maxdev" min="8" max="64"></label>
+      <label>Branch workstations max <input type="number" id="brws" min="1" max="12"></label>
+    </details>
+    <div class="row" style="margin-top:10px"><button class="primary" id="shuffle">Shuffle</button><span id="shufmsg" class="muted"></span></div>
+    <p class="muted" style="font-size:12px">Seeds come from OS entropy; generation is pseudorandom (seeded PRNG) and exactly replayable.</p>
+  </section>
+  <section>
+    <h2>Saved scenarios</h2>
+    <div id="scen" class="list"></div>
+  </section>
+</div>
+<div>
+  <div class="grid2">
+  <section>
+    <h2>Scenario</h2>
+    <div id="sinfo" class="muted">Shuffle or select a scenario.</div>
+    <div class="row" style="margin-top:10px">
+      <button id="replay" disabled>Verify replay</button>
+      <button id="labstart" disabled>Start lab</button><button id="labstop">Stop</button><button id="labreset">Reset</button>
+    </div>
+    <div id="labinfo" class="mono muted" style="margin-top:8px"></div>
+  </section>
+  <section>
+    <h2>Run</h2>
+    <label>Client <select id="client"><option value="devexana">Devexana OS (appliance)</option><option value="reference" selected>Reference client</option></select></label>
+    <label>Mode <select id="mode"><option value="read_only">Read-only investigation</option><option value="remediation">Remediation</option></select></label>
+    <label>Version label <input id="label" placeholder="e.g. devexana@59fe083" style="width:180px"></label>
+    <label>Time budget (s) <input type="number" id="budget" value="600" min="30" max="3600"></label>
+    <div class="row"><button class="primary" id="run" disabled>Run</button><span id="runmsg" class="muted"></span></div>
+    <div class="notice">The Devexana client needs DEVEXANA_URL / DEVEXANA_USERNAME / DEVEXANA_PASSWORD in the server's environment and a running appliance.</div>
+  </section>
+  </div>
+  <section>
+    <h2>Live activity and evidence timeline</h2>
+    <div class="row muted" style="margin-bottom:6px;font-size:12px"><span id="evcount"></span><label style="margin:0">hide collector/control <input type="checkbox" id="hidesys" checked></label></div>
+    <div class="scroll"><table><thead><tr><th>t (s)</th><th>source</th><th>kind</th><th>target</th><th>detail</th><th>ok</th></tr></thead><tbody id="events"></tbody></table></div>
+  </section>
+  <section>
+    <h2>Results</h2>
+    <div id="results" class="muted">No finished run selected.</div>
+    <div class="row" style="margin-top:10px"><button id="reveal" disabled>Reveal ground truth</button><button id="export" disabled>Export (no credentials)</button><button id="rerun" disabled>Replay run</button></div>
+    <div id="truth"></div>
+  </section>
+  <div class="grid2">
+  <section>
+    <h2>Batch regression</h2>
+    <label>Scenarios <select id="bsrc"><option value="all">All saved</option><option value="shuffle">Shuffle new</option></select></label>
+    <label>Shuffle count <input type="number" id="bcount" value="5" min="1" max="200"></label>
+    <div class="row"><button class="primary" id="batch">Run batch</button><span id="bmsg" class="muted"></span></div>
+    <div id="bres"></div>
+  </section>
+  <section>
+    <h2>Compare versions (same saved scenarios)</h2>
+    <label>A <select id="ca"></select></label><label>B <select id="cb"></select></label>
+    <button id="compare">Compare</button>
+    <div id="cres"></div>
+  </section>
+  </div>
+  <section>
+    <h2>Run history</h2>
+    <div class="scroll"><table><thead><tr><th>run</th><th>scenario</th><th>agent</th><th>mode</th><th>status</th><th>overall</th></tr></thead><tbody id="runs"></tbody></table></div>
+  </section>
+</div>
+</main>
+<script>
+const qs = new URLSearchParams(location.search);
+let TOKEN = qs.get('token') || ''; try { if (TOKEN) sessionStorage.setItem('nl_tok', TOKEN); else TOKEN = sessionStorage.getItem('nl_tok') || ''; } catch (e) {}
+if (qs.get('token')) history.replaceState(null, '', location.pathname);
+const $ = id => document.getElementById(id);
+const esc = s => String(s ?? '').replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+async function api(path, opt = {}) {
+  const r = await fetch(path, {...opt, headers: {'content-type': 'application/json', 'x-operator-token': TOKEN, ...(opt.headers || {})}});
+  if (!r.ok) { const t = await r.text(); throw new Error(`${r.status}: ${t.slice(0, 300)}`); }
+  return (r.headers.get('content-type') || '').includes('json') ? r.json() : r.blob();
+}
+let DEF, sel = null, curRun = null, evSeen = 0, polling = null;
+function weights(div, obj, prefix) {
+  div.innerHTML = Object.entries(obj).map(([k, v]) => `<label>${esc(k)} <input type="number" step="0.1" min="0" data-k="${esc(k)}" data-p="${prefix}" value="${v}"></label>`).join('');
+}
+function readW(prefix) { const o = {}; document.querySelectorAll(`input[data-p="${prefix}"]`).forEach(i => o[i.dataset.k] = parseFloat(i.value) || 0); return o; }
+function cfg() {
+  const c = structuredClone(DEF.config);
+  c.family_weights = {[$('family').value]: 1}; c.difficulty = +$('difficulty').value; c.evidence_completeness = +$('completeness').value;
+  c.balanced = $('balanced').checked; c.fault_count_weights = readW('fc'); c.fault_type_weights = readW('ft'); c.degradation_weights = readW('dg');
+  c.max_devices = +$('maxdev').value; c.branch_workstations = [Math.min(2, +$('brws').value), +$('brws').value]; return c;
+}
+async function init() {
+  if (!TOKEN) { document.body.insertAdjacentHTML('afterbegin', '<div class="notice" style="margin:16px">Open this page with the ?token=… URL printed by <code>netlab serve</code>.</div>'); return; }
+  DEF = await api('/api/config/defaults');
+  $('family').innerHTML = DEF.families.map(f => `<option value="${f}" ${DEF.implemented_families.includes(f) ? '' : 'disabled'}>${f}${DEF.implemented_families.includes(f) ? '' : ' (planned)'}</option>`).join('');
+  for (const [id, key] of [['difficulty', 'difficulty'], ['completeness', 'evidence_completeness']]) { $(id).value = DEF.config[key]; $(id + '_v').textContent = DEF.config[key]; $(id).oninput = () => $(id + '_v').textContent = $(id).value; }
+  weights($('fcw'), DEF.config.fault_count_weights, 'fc'); weights($('ftw'), DEF.config.fault_type_weights, 'ft'); weights($('dgw'), DEF.config.degradation_weights, 'dg');
+  $('maxdev').value = DEF.config.max_devices; $('brws').value = DEF.config.branch_workstations[1];
+  await refreshScenarios(); await refreshRuns(); await refreshLab(); await refreshLabels();
+}
+async function refreshScenarios() {
+  const s = await api('/api/scenarios');
+  $('scen').innerHTML = s.map(x => `<div data-env="${x.env_id}" class="${sel && sel.env_id === x.env_id ? 'sel' : ''}"><span class="mono">${x.env_id}</span> <span class="muted">${x.sites.join('/')} · ${x.devices} devices · d=${x.difficulty} e=${x.evidence_completeness}</span></div>`).join('') || '<div class="muted">none yet</div>';
+  $('scen').querySelectorAll('div[data-env]').forEach(d => d.onclick = () => select(s.find(x => x.env_id === d.dataset.env)));
+}
+function select(s) {
+  sel = s; refreshScenarios();
+  const re = s.resource_estimate;
+  $('sinfo').innerHTML = `<div class="kv"><b>env</b><span class="mono">${s.env_id}</span><b>seed</b><span class="mono">${s.seed}</span><b>family</b><span>${s.family} (${s.sites.join(' HQ / ')} branch)</span>
+    <b>devices</b><span>${s.devices} — ${Object.entries(s.kinds).map(([k, v]) => `${v} ${k}`).join(', ')}</span><b>generator</b><span class="mono">${s.generator_version}</span><b>spec sha256</b><span class="mono">${s.spec_sha256.slice(0, 16)}…</span>
+    <b>resources</b><span>${re.real_tcp_listeners} real listeners on ${re.host_network_exposure}, ~${re.estimated_memory_mb} MB, ${re.privileged_operations} privileged ops</span></div>
+    <p class="muted" style="font-size:12px">Faults and evidence degradations stay hidden until a run finishes.</p>`;
+  ['replay', 'labstart', 'run'].forEach(i => $(i).disabled = false);
+}
+async function refreshLab() {
+  const l = await api('/api/lab');
+  $('labchip').textContent = l.running ? `lab running: ${l.env_id} (${l.mode})` : 'lab idle'; $('labchip').className = 'chip' + (l.running ? ' on' : '');
+  $('labinfo').textContent = l.running ? `bastion 127.0.0.1:${l.ports.bastion} · api 127.0.0.1:${l.ports.api} · services ${l.ports.services.join(',')} · up ${l.uptime_s}s` : '';
+}
+async function refreshRuns() {
+  const r = await api('/api/runs');
+  $('runs').innerHTML = r.filter(x => x.run_id.startsWith('run-')).slice(0, 50).map(x => `<tr data-run="${x.run_id}" style="cursor:pointer"><td class="mono">${x.run_id}</td><td class="mono">${x.env_id}</td><td>${esc(x.agent?.label || x.agent?.name)}</td><td>${x.mode}</td><td>${x.status}</td><td>${x.overall ?? ''}</td></tr>`).join('');
+  $('runs').querySelectorAll('tr').forEach(t => t.onclick = () => openRun(t.dataset.run));
+}
+async function refreshLabels() {
+  const l = await api('/api/labels'); const o = l.map(x => `<option>${esc(x)}</option>`).join(''); $('ca').innerHTML = o; $('cb').innerHTML = o; if (l.length > 1) $('cb').selectedIndex = 1;
+}
+function evDetail(e) {
+  const d = e.detail || {};
+  if (e.kind === 'command') return esc(d.command) + (d.denied ? ' <span class="fail">[denied]</span>' : '');
+  if (e.kind === 'request') return esc(`${d.method} ${d.path} ${Object.keys(d.params || {}).length ? JSON.stringify(d.params) : ''} → ${d.status}`);
+  if (e.kind === 'channel_open') return esc(`${d.dest_host}:${d.dest_port}` + (d.error ? ` ✗ ${d.error}` : ''));
+  return esc(JSON.stringify(d).slice(0, 140));
+}
+async function pollEvents() {
+  if (!curRun) return;
+  const ev = await api(`/api/runs/${curRun}/events?after=${evSeen}`); evSeen += ev.length;
+  const hide = $('hidesys').checked;
+  $('events').insertAdjacentHTML('beforeend', ev.filter(e => !(hide && ['collector', 'control'].includes(e.source) && e.kind !== 'agent_finished')).map(e =>
+    `<tr><td class="mono">${e.t_rel_s.toFixed(1)}</td><td>${e.source}</td><td>${e.kind}</td><td class="mono">${esc(e.target)}</td><td class="mono">${evDetail(e)}${e.change ? ' <b>change</b>' : ''}${(e.reveals || []).length ? ` <span class="pass">reveals ${e.reveals.join(',')}</span>` : ''}</td><td class="${e.ok ? 'pass' : 'fail'}">${e.ok ? '✓' : '✗'}</td></tr>`).join(''));
+  $('evcount').textContent = `${evSeen} events`;
+  const info = await api(`/api/runs/${curRun}`);
+  $('runchip').textContent = info.finished ? `run ${curRun}: ${info.status}` : `run ${curRun}: running`;
+  if (info.finished) { clearInterval(polling); polling = null; await showResult(curRun); refreshRuns(); refreshLabels(); }
+}
+async function openRun(id) {
+  curRun = id; evSeen = 0; $('events').innerHTML = ''; $('truth').innerHTML = ''; $('results').textContent = 'Running…';
+  ['reveal', 'export', 'rerun'].forEach(i => $(i).disabled = true);
+  if (polling) clearInterval(polling); polling = setInterval(() => pollEvents().catch(console.error), 1000); await pollEvents();
+}
+async function showResult(id) {
+  const r = await api(`/api/runs/${id}/result`);
+  const sc = Object.entries(r.scores).map(([k, v]) => `<div class="score"><span>${k}</span><div class="bar"><i style="width:${v == null ? 0 : Math.round(v * 100)}%"></i></div><span class="mono">${v == null ? 'n/a' : v.toFixed(2)}</span></div>`).join('');
+  const m = r.measurements;
+  $('results').innerHTML = `<div class="row" style="align-items:flex-end;gap:24px"><div><div class="muted">overall</div><div class="big">${r.overall ?? 'n/a'}</div></div>
+    <div class="kv"><b>status</b><span>${r.status}</span><b>agent</b><span>${esc(r.agent.label || r.agent.name + '@' + r.agent.version)}</span><b>time / actions</b><span>${m.agent_seconds}s · ${m.commands} commands · ${m.api_requests} API calls</span>
+    <b>flows ok start→end</b><span>${m.intended_flows_ok_at_start} → ${m.intended_flows_ok_at_end} of ${m.intended_flows_total}</span><b>false positives</b><span>${m.false_positive_count} (${m.false_positives_on_distractors} on distractors)</span>
+    <b>unsupported correct</b><span>${m.unsupported_correct}</span><b>changes</b><span>${m.changes.length} (${m.collateral_changes.length} collateral)</span></div></div>
+    <div style="margin:10px 0">${sc}</div>
+    <h2 style="margin-top:14px">Expected vs observed</h2><div class="scroll"><table><thead><tr><th></th><th>item</th><th>expected</th><th>observed</th></tr></thead><tbody>
+    ${r.expected_vs_observed.map(x => `<tr><td class="${x.pass ? 'pass' : 'fail'}">${x.pass ? '✓' : '✗'}</td><td class="mono">${esc(x.item)}</td><td>${esc(x.expected)}</td><td>${esc(x.observed)}</td></tr>`).join('')}</tbody></table></div>`;
+  ['reveal', 'export', 'rerun'].forEach(i => $(i).disabled = false);
+}
+$('shuffle').onclick = async () => { $('shufmsg').textContent = '…'; try { const s = await api('/api/shuffle', {method: 'POST', body: JSON.stringify(cfg())}); $('shufmsg').textContent = ''; await refreshScenarios(); select(s); } catch (e) { $('shufmsg').textContent = e.message; } };
+$('replay').onclick = async () => { const r = await api(`/api/scenarios/${sel.env_id}/replay`, {method: 'POST'}); alert(`spec identical: ${r.spec_identical}\nartifacts identical: ${r.artifacts_identical}\nsha256 ${r.replayed_sha256}`); };
+$('labstart').onclick = async () => { try { await api('/api/lab/start', {method: 'POST', body: JSON.stringify({env_id: sel.env_id, mode: $('mode').value})}); } catch (e) { alert(e.message); } refreshLab(); };
+$('labstop').onclick = async () => { await api('/api/lab/stop', {method: 'POST'}); refreshLab(); };
+$('labreset').onclick = async () => { try { await api('/api/lab/reset', {method: 'POST'}); } catch (e) { alert(e.message); } refreshLab(); };
+$('run').onclick = async () => {
+  $('runmsg').textContent = 'starting…';
+  try { const r = await api('/api/runs', {method: 'POST', body: JSON.stringify({env_id: sel.env_id, client: $('client').value, mode: $('mode').value, label: $('label').value || null, time_budget_s: +$('budget').value})}); $('runmsg').textContent = ''; refreshLab(); openRun(r.run_id); }
+  catch (e) { $('runmsg').textContent = e.message; }
+};
+$('reveal').onclick = async () => {
+  const t = await api(`/api/runs/${curRun}/truth`);
+  $('truth').innerHTML = `<h2 style="margin-top:14px">Ground truth (reviewer only)</h2><div class="kv"><b>interacting faults</b><span>${t.interacting}</span></div>
+    <table><thead><tr><th>fault</th><th>type</th><th>description</th><th>onset</th></tr></thead><tbody>${t.faults.map(f => `<tr><td class="mono">${f.id}</td><td>${f.type}</td><td>${esc(f.description)}</td><td>${f.onset_minutes_before_start} min before</td></tr>`).join('') || '<tr><td colspan=4>healthy environment (no faults)</td></tr>'}</tbody></table>
+    <table style="margin-top:8px"><thead><tr><th>degradation</th><th>type</th><th>description</th></tr></thead><tbody>${t.degradations.map(d => `<tr><td class="mono">${d.id}</td><td>${d.type}</td><td>${esc(d.description)}</td></tr>`).join('') || '<tr><td colspan=3>complete evidence</td></tr>'}</tbody></table>
+    <table style="margin-top:8px"><thead><tr><th>distractor</th><th>target</th><th>description</th></tr></thead><tbody>${t.distractors.map(d => `<tr><td>${d.kind}</td><td class="mono">${esc(d.target)}</td><td>${esc(d.description)}</td></tr>`).join('') || '<tr><td colspan=3>none</td></tr>'}</tbody></table>`;
+};
+$('export').onclick = async () => { const b = await api(`/api/runs/${curRun}/export`); const a = document.createElement('a'); a.href = URL.createObjectURL(b); a.download = `${curRun}.zip`; a.click(); };
+$('rerun').onclick = async () => { const r = await api(`/api/runs/${curRun}/rerun`, {method: 'POST'}); openRun(r.run_id); };
+$('batch').onclick = async () => {
+  const body = {client: $('client').value, mode: $('mode').value, label: $('label').value || null, time_budget_s: +$('budget').value, config: cfg()};
+  if ($('bsrc').value === 'all') body.env_ids = (await api('/api/scenarios')).map(s => s.env_id); else body.shuffle_count = +$('bcount').value;
+  try { const b = await api('/api/batches', {method: 'POST', body: JSON.stringify(body)});
+    const t = setInterval(async () => { const s = await api(`/api/batches/${b.batch}`); $('bmsg').textContent = `${s.done}/${s.total}`;
+      $('bres').innerHTML = `<table><tbody>${s.rows.map(x => `<tr><td class="mono">${x.env_id}</td><td>${x.status}</td><td>${x.overall ?? ''}</td></tr>`).join('')}</tbody></table>` + (s.summary ? `<p>mean overall <b>${s.summary.mean_overall}</b> · batch <span class="mono">${s.summary.batch_id}</span></p>` : '') + (s.error ? `<p class="fail">${esc(s.error)}</p>` : '');
+      if (s.summary || s.error) { clearInterval(t); refreshRuns(); refreshLabels(); refreshScenarios(); } }, 1500);
+  } catch (e) { $('bmsg').textContent = e.message; }
+};
+$('compare').onclick = async () => {
+  const c = await api(`/api/compare?a=${encodeURIComponent($('ca').value)}&b=${encodeURIComponent($('cb').value)}`);
+  $('cres').innerHTML = `<p>${c.paired_scenarios} paired scenarios · mean A ${c.mean_a ?? 'n/a'} · mean B ${c.mean_b ?? 'n/a'} · B better on ${c.b_better}, A better on ${c.a_better}</p><table><thead><tr><th>scenario</th><th>A</th><th>B</th><th>Δ</th></tr></thead><tbody>${c.rows.map(r => `<tr><td class="mono">${r.env_id}</td><td>${r.a}</td><td>${r.b}</td><td class="${(r.delta || 0) >= 0 ? 'pass' : 'fail'}">${r.delta}</td></tr>`).join('')}</tbody></table>`;
+};
+setInterval(() => refreshLab().catch(() => {}), 3000);
+init().catch(e => document.body.insertAdjacentHTML('afterbegin', `<div class="notice" style="margin:16px">${esc(e.message)}</div>`));
+</script>
+</body>
+</html>

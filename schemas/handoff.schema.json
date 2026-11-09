@@ -1,0 +1,99 @@
+{
+ "additionalProperties": false,
+ "properties": {
+  "schema_version": {
+   "const": "1.0",
+   "default": "1.0",
+   "title": "Schema Version",
+   "type": "string"
+  },
+  "run_id": {
+   "title": "Run Id",
+   "type": "string"
+  },
+  "mode": {
+   "enum": [
+    "read_only",
+    "remediation"
+   ],
+   "title": "Mode",
+   "type": "string"
+  },
+  "task": {
+   "title": "Task",
+   "type": "string"
+  },
+  "api_base": {
+   "title": "Api Base",
+   "type": "string"
+  },
+  "api_token": {
+   "title": "Api Token",
+   "type": "string"
+  },
+  "bastion": {
+   "additionalProperties": true,
+   "title": "Bastion",
+   "type": "object"
+  },
+  "device_username": {
+   "title": "Device Username",
+   "type": "string"
+  },
+  "device_password": {
+   "title": "Device Password",
+   "type": "string"
+  },
+  "consoles": {
+   "additionalProperties": true,
+   "title": "Consoles",
+   "type": "object"
+  },
+  "artifacts": {
+   "items": {
+    "type": "string"
+   },
+   "title": "Artifacts",
+   "type": "array"
+  },
+  "report_vocabulary": {
+   "additionalProperties": {
+    "items": {
+     "type": "string"
+    },
+    "type": "array"
+   },
+   "title": "Report Vocabulary",
+   "type": "object"
+  },
+  "budget": {
+   "additionalProperties": true,
+   "title": "Budget",
+   "type": "object"
+  },
+  "notes": {
+   "items": {
+    "type": "string"
+   },
+   "title": "Notes",
+   "type": "array"
+  }
+ },
+ "required": [
+  "run_id",
+  "mode",
+  "task",
+  "api_base",
+  "api_token",
+  "bastion",
+  "device_username",
+  "device_password",
+  "consoles",
+  "artifacts",
+  "report_vocabulary",
+  "budget",
+  "notes"
+ ],
+ "title": "Handoff",
+ "type": "object"
+}
